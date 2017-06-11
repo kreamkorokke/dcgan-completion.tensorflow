@@ -10,35 +10,46 @@ import tensorflow as tf
 
 from model import DCGAN
 from utils import imread, complete_images
+import numpy as np
+
+def path_check_exist(path):
+    if not os.path.exists(path):
+        raise argparse.ArgumentTypeError("Checkpoint directory %s does not exist!" % path)
+    return path
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', type=float, default=0.01)
 parser.add_argument('--beta1', type=float, default=0.9)
 parser.add_argument('--beta2', type=float, default=0.999)
 parser.add_argument('--eps', type=float, default=1e-8)
-parser.add_argument('--nIter', type=int, default=1000)
-parser.add_argument('--imgSize', type=int, default=64)
+parser.add_argument('--num-iters', dest='num_iters', type=int, default=1000)
+parser.add_argument('--img-size', dest='img_size', type=int, default=64)
 parser.add_argument('--lam', type=float, default=0.1)
-parser.add_argument('--checkpointDir', type=str, default='checkpoint')
-parser.add_argument('--output-dir', type=str, dest='output_dir', default='completions')
-parser.add_argument('--outInterval', type=int, default=50)
-parser.add_argument('--mask-type', type=str, dest='mask_type',
-                    choices=['random', 'center', 'left', 'full', 'grid'],
+parser.add_argument('--checkpoint-dir', dest='checkpoint_dir',\
+                    type=path_check_exist, default='checkpoint')
+parser.add_argument('--output-dir', dest='output_dir', type=str, default='completions')
+parser.add_argument('--out-interval', dest='out_interval', type=int, default=100)
+parser.add_argument('--mask-type', dest='mask_type', type=str,\
+                    choices=['random', 'center', 'left', 'full', 'grid'],\
                     default='center')
-parser.add_argument('--center-scale', type=float, dest='center_scale', default=0.25)
+parser.add_argument('--center-scale', dest='center_scale', type=float, default=0.25)
+parser.add_argument('--wgan', dest='use_wgan', action='store_true')
 parser.add_argument('imgs', type=str, nargs='+')
 
 args = parser.parse_args()
 
-assert(os.path.exists(args.checkpointDir))
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
-    dcgan = DCGAN(sess, image_size=args.imgSize,
-                  checkpoint_dir=args.checkpointDir, lam=args.lam)
+    if args.use_wgan:
+        raise "WGAN not yet supported"
+    else:
+        model = DCGAN(sess, image_size=args.img_size,
+                      checkpoint_dir=args.checkpoint_dir, lam=args.lam)
     # Need to have a loaded model
-    assert(dcgan.load())
+    tf.global_variables_initializer().run()
+    assert(model.load(model.checkpoint_dir))
     
     # Construct mask
     image_shape = imread(args.imgs[0]).shape
@@ -67,5 +78,6 @@ with tf.Session(config=config) as sess:
         raise "Unknown mask type %s" % mask_type
 
     adam_config = {'beta1': args.beta1, 'beta2': args.beta2, 'lr': args.lr, 'eps': args.eps}
-    complete_images(dcgan, num_iters=1000, input_image_paths=args.imgs, mask=mask,\
-                    output_dir=args.output_dir, )
+    complete_images(model, num_iters=1000, input_image_paths=args.imgs, mask=mask,\
+                    output_dir=args.output_dir, adam_config=adam_config,\
+                    save_per_num_iters=args.out_interval)

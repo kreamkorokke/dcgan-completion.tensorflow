@@ -11,7 +11,6 @@ import scipy.misc
 import numpy as np
 
 from model import DCGAN
-from utils import pp, visualize, to_json
 
 import tensorflow as tf
 

@@ -4,7 +4,6 @@
 # [2016-08-05] Modifications for Completion: Brandon Amos (http://bamos.github.io)
 #   + License: MIT
 
-from __future__ import division
 import os
 import time
 from glob import glob
@@ -145,8 +144,8 @@ class DCGAN(object):
         start_time = time.time()
 
         if self.load(self.checkpoint_dir):
-            print("""
-
+            print(
+"""
 ======
 An existing model was found in the checkpoint directory.
 If you just cloned this repository, it's a model for faces
@@ -155,17 +154,15 @@ If you want to train a new model from scratch,
 delete the checkpoint directory or specify a different
 --checkpoint_dir argument.
 ======
-
-""")
+"""         )
         else:
-            print("""
-
+            print(
+"""
 ======
 An existing model was not found in the checkpoint directory.
 Initializing a new one.
 ======
-
-""")
+"""         )
 
         for epoch in xrange(config.epoch):
             data = glob(os.path.join(config.dataset, "*.png"))
@@ -216,15 +213,22 @@ Initializing a new one.
                 if np.mod(counter, 500) == 2:
                     self.save(config.checkpoint_dir, counter)
 
+    def step_completion(self, input_z, batch_mask, images, is_training=False):
+        fd = {
+            'z:0': input_z,
+            'mask:0': batch_mask,
+            'real_images:0': images,
+            'is_training:0': is_training
+        }
+        run = [self.complete_loss, self.grad_complete_loss, self.G]
+        loss, g, G_imgs = self.sess.run(run, feed_dict=fd)
+        return (loss, g, G_imgs)
 
     def complete(self, config):
         os.makedirs(os.path.join(config.outDir, 'hats_imgs'), exist_ok=True)
         os.makedirs(os.path.join(config.outDir, 'completed'), exist_ok=True)
 
-        try:
-            tf.global_variables_initializer().run()
-        except:
-            tf.initialize_all_variables().run()
+        tf.global_variables_initializer().run()
 
         isLoaded = self.load(self.checkpoint_dir)
         assert(isLoaded)
