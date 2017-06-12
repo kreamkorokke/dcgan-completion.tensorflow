@@ -1,3 +1,13 @@
+The code in this repo was modified based on Brandon Amos's "Image Completion
+with Deep Learning in Tensorflow"
+https://github.com/bamos/dcgan-completion.tensorflow
+The modifications are Copyright (c) 2017 Koki Yoshida and Chenduo Huang
+
+In compliance with original licenses, we reproduce the license
+statement below, and release the code in this directory under the same license.
+
+----------------------------------------------------------------------------
+
 Most of the code in this repository was written by modifying a duplicate of
 Taehoon Kim's DCGAN-tensorflow project:
 https://github.com/carpedm20/DCGAN-tensorflow
