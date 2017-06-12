@@ -3,12 +3,17 @@
 # Brandon Amos (http://bamos.github.io)
 # License: MIT
 # 2016-08-05
+#
+# (Modified) Koki Yoshida and Chenduo Huang
+# License: MIT
+# 2017-06-01
+
 
 import argparse
 import os
 import tensorflow as tf
 
-from model import DCGAN
+from dcgan import DCGAN
 from utils import imread, complete_images
 import numpy as np
 
