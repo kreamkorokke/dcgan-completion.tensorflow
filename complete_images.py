@@ -14,7 +14,7 @@ import os
 import tensorflow as tf
 
 from dcgan import DCGAN
-from utils import imread, complete_images
+from img_utils import imread, complete_images
 import numpy as np
 
 def path_check_exist(path):
@@ -38,8 +38,8 @@ parser.add_argument('--mask-type', dest='mask_type', type=str,\
                     choices=['random', 'center', 'left', 'full', 'grid'],\
                     default='center')
 parser.add_argument('--center-scale', dest='center_scale', type=float, default=0.25)
-parser.add_argument('--wgan', dest='use_wgan', action='store_true')
 parser.add_argument('imgs', type=str, nargs='+')
+parser.add_argument('--log-l1-loss', dest='log_l1_loss', action='store_true')
 
 args = parser.parse_args()
 
@@ -47,11 +47,8 @@ args = parser.parse_args()
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
-    if args.use_wgan:
-        raise "WGAN not yet supported"
-    else:
-        model = DCGAN(sess, image_size=args.img_size,
-                      checkpoint_dir=args.checkpoint_dir, lam=args.lam)
+    model = DCGAN(sess, image_size=args.img_size,
+                  checkpoint_dir=args.checkpoint_dir, lam=args.lam)
     # Need to have a loaded model
     tf.global_variables_initializer().run()
     assert(model.load(model.checkpoint_dir))
@@ -85,4 +82,4 @@ with tf.Session(config=config) as sess:
     adam_config = {'beta1': args.beta1, 'beta2': args.beta2, 'lr': args.lr, 'eps': args.eps}
     complete_images(model, num_iters=1000, input_image_paths=args.imgs, mask=mask,\
                     output_dir=args.output_dir, adam_config=adam_config,\
-                    save_per_num_iters=args.out_interval)
+                    save_per_num_iters=args.out_interval, log_l1_loss=args.log_l1_loss)
