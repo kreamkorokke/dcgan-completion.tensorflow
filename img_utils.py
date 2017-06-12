@@ -53,7 +53,7 @@ def complete_images(model, num_iters, input_image_paths, mask, output_dir,\
         for i in range(num_iters):
             loss, g, G_imgs, contextual_loss = model.step_completion(input_z, batch_mask, cur_images)
             if log_l1_loss:
-                f.write('%5.2f,%5.2f' % ((time.time() - start_time), np.mean(contextual_loss[:cur_size])))
+                f.write('%5.2f,%5.2f\n' % ((time.time() - start_time), np.mean(contextual_loss[:cur_size])))
             
             beta1, beta2 = adam_config['beta1'], adam_config['beta2']
             lr, eps = adam_config['lr'], adam_config['eps'] 
