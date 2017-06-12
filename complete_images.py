@@ -80,6 +80,6 @@ with tf.Session(config=config) as sess:
         raise "Unknown mask type %s" % mask_type
 
     adam_config = {'beta1': args.beta1, 'beta2': args.beta2, 'lr': args.lr, 'eps': args.eps}
-    complete_images(model, num_iters=1000, input_image_paths=args.imgs, mask=mask,\
+    complete_images(model, num_iters=args.num_iters, input_image_paths=args.imgs, mask=mask,\
                     output_dir=args.output_dir, adam_config=adam_config,\
                     save_per_num_iters=args.out_interval, log_l1_loss=args.log_l1_loss)
